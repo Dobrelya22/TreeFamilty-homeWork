@@ -1,9 +1,14 @@
 package Main;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Person {
+public class Person implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final String firstName;
     private final String lastName;
     private final String dateOfBirth;
@@ -47,3 +52,5 @@ public class Person {
         return firstName + " " + lastName + " (" + gender + "), born: " + dateOfBirth;
     }
 }
+
+

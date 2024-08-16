@@ -1,5 +1,7 @@
 package Main;
 
+import java.io.IOException;
+
 public class Main {
     public static void main(String[] args) {
         FamilyTree familyTree = new FamilyTree();
@@ -49,9 +51,8 @@ public class Main {
         familyTree.addPerson(babyDoe);
         familyTree.addPerson(sisterDoe);
 
-        // Демонстрация работы методов
-
-        System.out.println("Children of John Doe:");
+        // Демонстрация использования методов
+        System.out.println("\nChildren of John Doe:");
         for (Person child : familyTree.getChildrenOfPerson("John", "Doe")) {
             System.out.println(child);
         }
@@ -66,12 +67,12 @@ public class Main {
             System.out.println(sibling);
         }
 
-        // Используем метод removePerson
+        // Удаление Baby Doe из дерева
         familyTree.removePerson(babyDoe);
         System.out.println("\nFamily Tree after removing Baby Doe:");
         System.out.println(familyTree);
 
-        // Используем методы getDateOfBirth() и getGender() для демонстрации их работы
+        // Использование методов getDateOfBirth() и getGender()
         System.out.println("\nDetails of John Doe:");
         System.out.println("Date of Birth: " + john.getDateOfBirth());
         System.out.println("Gender: " + john.getGender());
@@ -79,5 +80,22 @@ public class Main {
         System.out.println("\nDetails of Baby Doe:");
         System.out.println("Date of Birth: " + babyDoe.getDateOfBirth());
         System.out.println("Gender: " + babyDoe.getGender());
+
+        // Сохранение дерева в файл и его загрузка
+        FamilyTreeStorage storage = new FileFamilyTreeStorage();
+        try {
+            storage.save(familyTree, "family_tree.dat");
+
+            // Загружаем дерево из файла
+            FamilyTree loadedTree = storage.load("family_tree.dat");
+
+            System.out.println("\nLoaded Family Tree:");
+            System.out.println(loadedTree);
+
+        } catch (IOException | ClassNotFoundException e) {
+            // Замена printStackTrace() на вывод сообщения об ошибке
+            System.err.println("An error occurred: " + e.getMessage());
+        }
     }
 }
+
