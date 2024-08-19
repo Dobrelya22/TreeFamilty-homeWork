@@ -1,4 +1,6 @@
-package Main;
+package Main.service;
+
+import Main.model.FamilyTree;
 
 import java.io.*;
 

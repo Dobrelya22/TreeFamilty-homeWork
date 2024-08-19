@@ -1,11 +1,13 @@
-package Main;
+package Main.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FamilyTree implements Serializable {
+public class FamilyTree implements Serializable, Iterable<Person> {
     private final List<Person> people;
 
     public FamilyTree() {
@@ -67,11 +69,27 @@ public class FamilyTree implements Serializable {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (Person person : people) {
-            sb.append(person.toString()).append("\n");
-        }
-        return sb.toString();
+    public Iterator<Person> iterator() {
+        return people.iterator();
+    }
+
+    // Сортировка по имени
+    public void sortByName() {
+        people.sort(Comparator.comparing(Person::getFirstName));
+    }
+
+    // Сортировка по дате рождения
+    public void sortByBirthDate() {
+        people.sort(Comparator.comparing(Person::getDateOfBirth));
+    }
+
+    public void printSortedByName() {
+        sortByName();
+        people.forEach(person -> System.out.println(person.getFirstName()));
+    }
+
+    public void printSortedByBirthDate() {
+        sortByBirthDate();
+        people.forEach(person -> System.out.println(person.getDateOfBirth()));
     }
 }

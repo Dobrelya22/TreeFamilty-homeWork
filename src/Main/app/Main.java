@@ -1,4 +1,9 @@
-package Main;
+package Main.app;
+
+import Main.model.FamilyTree;
+import Main.model.Person;
+import Main.service.FamilyTreeStorage;
+import Main.service.FileFamilyTreeStorage;
 
 import java.io.IOException;
 
@@ -50,6 +55,13 @@ public class Main {
         familyTree.addPerson(jane);
         familyTree.addPerson(babyDoe);
         familyTree.addPerson(sisterDoe);
+
+        // Вызов методов для сортировки и вывода людей
+        System.out.println("\nFamily Tree sorted by name:");
+        familyTree.printSortedByName();
+
+        System.out.println("\nFamily Tree sorted by birth date:");
+        familyTree.printSortedByBirthDate();
 
         // Демонстрация использования методов
         System.out.println("\nChildren of John Doe:");
