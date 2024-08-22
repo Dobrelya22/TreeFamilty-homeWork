@@ -7,26 +7,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FamilyTree implements Serializable, Iterable<Person> {
-    private final List<Person> people;
+public class FamilyTree<T extends Person> implements Serializable, Iterable<T> {
+    private final List<T> people;
 
     public FamilyTree() {
         this.people = new ArrayList<>();
     }
 
-    public void addPerson(Person person) {
+    public void addPerson(T person) {
         people.add(person);
     }
 
-    public void removePerson(Person person) {
+    public void removePerson(T person) {
         people.remove(person);
-        for (Person p : people) {
+        for (T p : people) {
             p.getChildren().remove(person);
         }
     }
 
-    public Person findPerson(String firstName, String lastName) {
-        for (Person person : people) {
+    public T findPerson(String firstName, String lastName) {
+        for (T person : people) {
             if (person.getFirstName().equals(firstName) && person.getLastName().equals(lastName)) {
                 return person;
             }
@@ -34,31 +34,34 @@ public class FamilyTree implements Serializable, Iterable<Person> {
         return null;
     }
 
-    public List<Person> getChildrenOfPerson(String firstName, String lastName) {
-        Person person = findPerson(firstName, lastName);
+    public List<T> getChildrenOfPerson(String firstName, String lastName) {
+        T person = findPerson(firstName, lastName);
         if (person != null) {
-            return person.getChildren();
-        }
-        return new ArrayList<>();
-    }
-
-    public List<Person> getSiblingsOfPerson(String firstName, String lastName) {
-        Person person = findPerson(firstName, lastName);
-        if (person != null) {
-            return people.stream()
-                    .filter(p -> p.getChildren().contains(person))
-                    .flatMap(p -> p.getChildren().stream())
-                    .filter(sibling -> !sibling.equals(person))
+            return person.getChildren().stream()
+                    .map(child -> (T) child)  // Преобразование с подавлением предупреждения
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
 
-    public List<Person> getAncestorsOfPerson(String firstName, String lastName) {
-        List<Person> ancestors = new ArrayList<>();
-        Person person = findPerson(firstName, lastName);
+    public List<T> getSiblingsOfPerson(String firstName, String lastName) {
+        T person = findPerson(firstName, lastName);
         if (person != null) {
-            for (Person p : people) {
+            return people.stream()
+                    .filter(p -> p.getChildren().contains(person))
+                    .flatMap(p -> p.getChildren().stream())
+                    .filter(sibling -> !sibling.equals(person))
+                    .map(sibling -> (T) sibling)  // Преобразование с подавлением предупреждения
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    public List<T> getAncestorsOfPerson(String firstName, String lastName) {
+        List<T> ancestors = new ArrayList<>();
+        T person = findPerson(firstName, lastName);
+        if (person != null) {
+            for (T p : people) {
                 if (p.getChildren().contains(person)) {
                     ancestors.add(p);
                     ancestors.addAll(getAncestorsOfPerson(p.getFirstName(), p.getLastName()));
@@ -69,18 +72,18 @@ public class FamilyTree implements Serializable, Iterable<Person> {
     }
 
     @Override
-    public Iterator<Person> iterator() {
+    public Iterator<T> iterator() {
         return people.iterator();
     }
 
     // Сортировка по имени
     public void sortByName() {
-        people.sort(Comparator.comparing(Person::getFirstName));
+        people.sort(Comparator.comparing(T::getFirstName));
     }
 
     // Сортировка по дате рождения
     public void sortByBirthDate() {
-        people.sort(Comparator.comparing(Person::getDateOfBirth));
+        people.sort(Comparator.comparing(T::getDateOfBirth));
     }
 
     public void printSortedByName() {

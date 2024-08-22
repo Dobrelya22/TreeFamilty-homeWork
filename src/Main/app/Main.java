@@ -9,7 +9,11 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        FamilyTree familyTree = new FamilyTree();
+
+        CommandLineInterface cli = new CommandLineInterface();
+        cli.start();
+
+        FamilyTree<Person> familyTree = new FamilyTree<>();
 
         // Прабабушки и прадедушки
         Person grandpaJohnSr = new Person("John Sr.", "Doe", "1940-01-01", "Male");
@@ -99,15 +103,16 @@ public class Main {
             storage.save(familyTree, "family_tree.dat");
 
             // Загружаем дерево из файла
-            FamilyTree loadedTree = storage.load("family_tree.dat");
+            FamilyTree<?> loadedTree = storage.load("family_tree.dat");
+            if (loadedTree != null) {
+                FamilyTree<Person> castedTree = (FamilyTree<Person>) loadedTree;
 
-            System.out.println("\nLoaded Family Tree:");
-            System.out.println(loadedTree);
+                System.out.println("\nLoaded Family Tree:");
+                System.out.println(castedTree);
+            }
 
         } catch (IOException | ClassNotFoundException e) {
-            // Замена printStackTrace() на вывод сообщения об ошибке
             System.err.println("An error occurred: " + e.getMessage());
         }
     }
 }
-
