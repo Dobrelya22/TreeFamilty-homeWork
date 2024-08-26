@@ -1,13 +1,10 @@
 package Main.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class FamilyTree<T extends Person> implements Serializable, Iterable<T> {
+public class FamilyTree<T extends Person> {
     private final List<T> people;
 
     public FamilyTree() {
@@ -16,13 +13,6 @@ public class FamilyTree<T extends Person> implements Serializable, Iterable<T> {
 
     public void addPerson(T person) {
         people.add(person);
-    }
-
-    public void removePerson(T person) {
-        people.remove(person);
-        for (T p : people) {
-            p.getChildren().remove(person);
-        }
     }
 
     public T findPerson(String firstName, String lastName) {
@@ -37,9 +27,11 @@ public class FamilyTree<T extends Person> implements Serializable, Iterable<T> {
     public List<T> getChildrenOfPerson(String firstName, String lastName) {
         T person = findPerson(firstName, lastName);
         if (person != null) {
-            return person.getChildren().stream()
-                    .map(child -> (T) child)  // Преобразование с подавлением предупреждения
-                    .collect(Collectors.toList());
+            List<T> children = new ArrayList<>();
+            for (Person child : person.getChildren()) {
+                children.add((T) child); // Приведение типа к T
+            }
+            return children;
         }
         return new ArrayList<>();
     }
@@ -47,12 +39,17 @@ public class FamilyTree<T extends Person> implements Serializable, Iterable<T> {
     public List<T> getSiblingsOfPerson(String firstName, String lastName) {
         T person = findPerson(firstName, lastName);
         if (person != null) {
-            return people.stream()
-                    .filter(p -> p.getChildren().contains(person))
-                    .flatMap(p -> p.getChildren().stream())
-                    .filter(sibling -> !sibling.equals(person))
-                    .map(sibling -> (T) sibling)  // Преобразование с подавлением предупреждения
-                    .collect(Collectors.toList());
+            List<T> siblings = new ArrayList<>();
+            for (T p : people) {
+                if (p.getChildren().contains(person)) {
+                    for (Person child : p.getChildren()) {
+                        if (!child.equals(person)) {
+                            siblings.add((T) child); // Приведение типа к T
+                        }
+                    }
+                }
+            }
+            return siblings;
         }
         return new ArrayList<>();
     }
@@ -71,28 +68,24 @@ public class FamilyTree<T extends Person> implements Serializable, Iterable<T> {
         return ancestors;
     }
 
-    @Override
-    public Iterator<T> iterator() {
-        return people.iterator();
+    public List<T> getAllPeople() {
+        return new ArrayList<>(people);
     }
 
-    // Сортировка по имени
+    public void clear() {
+        people.clear();
+    }
+
+    public void addPeople(List<T> newPeople) {
+        people.addAll(newPeople);
+    }
+
     public void sortByName() {
-        people.sort(Comparator.comparing(T::getFirstName));
+        people.sort(Comparator.comparing(Person::getFirstName));
     }
 
-    // Сортировка по дате рождения
     public void sortByBirthDate() {
-        people.sort(Comparator.comparing(T::getDateOfBirth));
+        people.sort(Comparator.comparing(Person::getDateOfBirth));
     }
 
-    public void printSortedByName() {
-        sortByName();
-        people.forEach(person -> System.out.println(person.getFirstName()));
-    }
-
-    public void printSortedByBirthDate() {
-        sortByBirthDate();
-        people.forEach(person -> System.out.println(person.getDateOfBirth()));
-    }
 }

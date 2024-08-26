@@ -1,26 +1,23 @@
 package Main.app;
 
-import Main.model.FamilyTree;
-import Main.model.Person;
-import Main.service.FamilyTreeStorage;
-import Main.service.FileFamilyTreeStorage;
+import Main.presenter.FamilyTreePresenter;
+import Main.view.ConsoleFamilyTreeView;
 
-import java.io.IOException;
 import java.util.Scanner;
 
 public class CommandLineInterface {
-    private FamilyTree<Person> familyTree;
-    private final FamilyTreeStorage storage;
+    private final FamilyTreePresenter presenter;
+    private final ConsoleFamilyTreeView view;
 
-    public CommandLineInterface() {
-        this.familyTree = new FamilyTree<>();
-        this.storage = new FileFamilyTreeStorage();
+    public CommandLineInterface(FamilyTreePresenter presenter, ConsoleFamilyTreeView view) {
+        this.presenter = presenter;
+        this.view = view;
     }
 
     public void start() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
-            System.out.println("Enter a command (add, find, save, load, show, exit):");
+            view.showMessage("Enter a command (add, find, save, load, show, children, ancestors, siblings, exit):");
             String command = scanner.nextLine();
 
             if (command.equals("exit")) {
@@ -41,70 +38,88 @@ public class CommandLineInterface {
                     loadTree(scanner);
                     break;
                 case "show":
-                    showTree();
+                    presenter.showTreeSortedByName();
+                    break;
+                case "children":
+                    showChildren(scanner);
+                    break;
+                case "ancestors":
+                    showAncestors(scanner);
+                    break;
+                case "siblings":
+                    showSiblings(scanner);
                     break;
                 default:
-                    System.out.println("Unknown command.");
+                    view.showMessage("Unknown command.");
             }
         }
         scanner.close();
     }
 
     private void addPerson(Scanner scanner) {
-        System.out.print("Enter first name: ");
+        view.showMessage("Enter first name:");
         String firstName = scanner.nextLine();
-        System.out.print("Enter last name: ");
+        view.showMessage("Enter last name:");
         String lastName = scanner.nextLine();
-        System.out.print("Enter date of birth (YYYY-MM-DD): ");
+        view.showMessage("Enter date of birth (YYYY-MM-DD):");
         String dateOfBirth = scanner.nextLine();
-        System.out.print("Enter gender: ");
+        view.showMessage("Enter gender:");
         String gender = scanner.nextLine();
 
-        Person person = new Person(firstName, lastName, dateOfBirth, gender);
-        familyTree.addPerson(person);
-        System.out.println("Person added: " + person);
+        presenter.addPerson(firstName, lastName, dateOfBirth, gender);
     }
 
     private void findPerson(Scanner scanner) {
-        System.out.print("Enter first name: ");
+        view.showMessage("Enter first name:");
         String firstName = scanner.nextLine();
-        System.out.print("Enter last name: ");
+        view.showMessage("Enter last name:");
         String lastName = scanner.nextLine();
+        presenter.showPersonDetails(presenter.findPersonByName(firstName, lastName));
+    }
 
-        Person person = familyTree.findPerson(firstName, lastName);
-        if (person != null) {
-            System.out.println("Person found: " + person);
-        } else {
-            System.out.println("Person not found.");
-        }
+    private void showChildren(Scanner scanner) {
+        view.showMessage("Enter first name:");
+        String firstName = scanner.nextLine();
+        view.showMessage("Enter last name:");
+        String lastName = scanner.nextLine();
+        presenter.showChildrenOfPerson(firstName, lastName);
+    }
+
+    private void showAncestors(Scanner scanner) {
+        view.showMessage("Enter first name:");
+        String firstName = scanner.nextLine();
+        view.showMessage("Enter last name:");
+        String lastName = scanner.nextLine();
+        presenter.showAncestorsOfPerson(firstName, lastName);
+    }
+
+    private void showSiblings(Scanner scanner) {
+        view.showMessage("Enter first name:");
+        String firstName = scanner.nextLine();
+        view.showMessage("Enter last name:");
+        String lastName = scanner.nextLine();
+        presenter.showSiblingsOfPerson(firstName, lastName);
     }
 
     private void saveTree(Scanner scanner) {
-        System.out.print("Enter filename to save: ");
+        view.showMessage("Enter filename to save:");
         String fileName = scanner.nextLine();
         try {
-            storage.save(familyTree, fileName);
-            System.out.println("Family tree saved to " + fileName);
-        } catch (IOException e) {
-            System.err.println("Failed to save tree: " + e.getMessage());
+            presenter.saveTree(fileName);
+            view.showMessage("Family tree saved to " + fileName);
+        } catch (Exception e) {
+            view.showMessage("Failed to save tree: " + e.getMessage());
         }
     }
 
     private void loadTree(Scanner scanner) {
-        System.out.print("Enter filename to load: ");
+        view.showMessage("Enter filename to load:");
         String fileName = scanner.nextLine();
         try {
-            familyTree = (FamilyTree<Person>) storage.load(fileName);
-            System.out.println("Family tree loaded from " + fileName);
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to load tree: " + e.getMessage());
-        }
-    }
-
-    private void showTree() {
-        System.out.println("Family Tree:");
-        for (Person person : familyTree) {
-            System.out.println(person);
+            presenter.loadTree(fileName);
+            view.showMessage("Family tree loaded from " + fileName);
+        } catch (Exception e) {
+            view.showMessage("Failed to load tree: " + e.getMessage());
         }
     }
 }

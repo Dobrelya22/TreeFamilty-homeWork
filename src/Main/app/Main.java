@@ -1,118 +1,68 @@
 package Main.app;
 
-import Main.model.FamilyTree;
-import Main.model.Person;
-import Main.service.FamilyTreeStorage;
+import Main.presenter.FamilyTreePresenter;
 import Main.service.FileFamilyTreeStorage;
-
-import java.io.IOException;
+import Main.view.ConsoleFamilyTreeView;
 
 public class Main {
     public static void main(String[] args) {
+        FamilyTreePresenter presenter = createPresenter();
+        populateFamilyTree(presenter);
+        displayFamilyTree(presenter);
 
-        CommandLineInterface cli = new CommandLineInterface();
-        cli.start();
+        // Запуск интерфейса командной строки
+        runCommandLineInterface(presenter, new ConsoleFamilyTreeView());
+    }
 
-        FamilyTree<Person> familyTree = new FamilyTree<>();
+    private static FamilyTreePresenter createPresenter() {
+        ConsoleFamilyTreeView view = new ConsoleFamilyTreeView();
+        return new FamilyTreePresenter(new FileFamilyTreeStorage(), view);
+    }
 
+    private static void populateFamilyTree(FamilyTreePresenter presenter) {
         // Прабабушки и прадедушки
-        Person grandpaJohnSr = new Person("John Sr.", "Doe", "1940-01-01", "Male");
-        Person grandmaMarySr = new Person("Mary Sr.", "Doe", "1942-02-02", "Female");
-        Person grandpaJames = new Person("James", "Smith", "1938-03-03", "Male");
-        Person grandmaElizabeth = new Person("Elizabeth", "Smith", "1941-04-04", "Female");
+        presenter.addPerson("John Sr.", "Doe", "1940-01-01", "Male");
+        presenter.addPerson("Mary Sr.", "Doe", "1942-02-02", "Female");
+        presenter.addPerson("James", "Smith", "1938-03-03", "Male");
+        presenter.addPerson("Elizabeth", "Smith", "1941-04-04", "Female");
 
         // Бабушки и дедушки
-        Person grandpaJohnJr = new Person("John Jr.", "Doe", "1960-05-05", "Male");
-        Person grandmaMaryJr = new Person("Mary Jr.", "Doe", "1962-06-06", "Female");
-        Person grandpaMichael = new Person("Michael", "Smith", "1963-07-07", "Male");
-        Person grandmaLinda = new Person("Linda", "Smith", "1965-08-08", "Female");
+        presenter.addPerson("John Jr.", "Doe", "1960-05-05", "Male");
+        presenter.addPerson("Mary Jr.", "Doe", "1962-06-06", "Female");
+        presenter.addPerson("Michael", "Smith", "1963-07-07", "Male");
+        presenter.addPerson("Linda", "Smith", "1965-08-08", "Female");
 
         // Родители
-        Person john = new Person("John", "Doe", "1980-01-01", "Male");
-        Person jane = new Person("Jane", "Doe", "1982-05-15", "Female");
+        presenter.addPerson("John", "Doe", "1980-01-01", "Male");
+        presenter.addPerson("Jane", "Doe", "1982-05-15", "Female");
 
         // Дети
-        Person babyDoe = new Person("Baby", "Doe", "2005-12-03", "Male");
-        Person sisterDoe = new Person("Sister", "Doe", "2007-09-09", "Female");
+        presenter.addPerson("Baby", "Doe", "2005-12-03", "Male");
+        presenter.addPerson("Sister", "Doe", "2007-09-09", "Female");
 
         // Связи между поколениями
-        grandpaJohnJr.addChild(john); // Джон младший - сын Джона старшего и Мэри
-        grandmaMaryJr.addChild(john);
-        grandpaMichael.addChild(jane); // Джейн - дочь Майкла и Линды
-        grandmaLinda.addChild(jane);
+        presenter.addChild("John Jr.", "Doe", "John", "Doe");
+        presenter.addChild("Mary Jr.", "Doe", "John", "Doe");
+        presenter.addChild("Michael", "Smith", "Jane", "Doe");
+        presenter.addChild("Linda", "Smith", "Jane", "Doe");
 
-        john.addChild(babyDoe); // Джон и Джейн - родители Baby Doe
-        jane.addChild(babyDoe);
-        john.addChild(sisterDoe); // Джон и Джейн - родители Sister Doe
-        jane.addChild(sisterDoe);
+        presenter.addChild("John", "Doe", "Baby", "Doe");
+        presenter.addChild("Jane", "Doe", "Baby", "Doe");
+        presenter.addChild("John", "Doe", "Sister", "Doe");
+        presenter.addChild("Jane", "Doe", "Sister", "Doe");
+    }
 
-        // Добавляем всех в дерево
-        familyTree.addPerson(grandpaJohnSr);
-        familyTree.addPerson(grandmaMarySr);
-        familyTree.addPerson(grandpaJames);
-        familyTree.addPerson(grandmaElizabeth);
-        familyTree.addPerson(grandpaJohnJr);
-        familyTree.addPerson(grandmaMaryJr);
-        familyTree.addPerson(grandpaMichael);
-        familyTree.addPerson(grandmaLinda);
-        familyTree.addPerson(john);
-        familyTree.addPerson(jane);
-        familyTree.addPerson(babyDoe);
-        familyTree.addPerson(sisterDoe);
-
-        // Вызов методов для сортировки и вывода людей
+    private static void displayFamilyTree(FamilyTreePresenter presenter) {
         System.out.println("\nFamily Tree sorted by name:");
-        familyTree.printSortedByName();
+        presenter.showTreeSortedByName();
 
         System.out.println("\nFamily Tree sorted by birth date:");
-        familyTree.printSortedByBirthDate();
+        presenter.showTreeSortedByBirthDate();
+    }
 
-        // Демонстрация использования методов
-        System.out.println("\nChildren of John Doe:");
-        for (Person child : familyTree.getChildrenOfPerson("John", "Doe")) {
-            System.out.println(child);
-        }
-
-        System.out.println("\nAncestors of Baby Doe:");
-        for (Person ancestor : familyTree.getAncestorsOfPerson("Baby", "Doe")) {
-            System.out.println(ancestor);
-        }
-
-        System.out.println("\nSiblings of Baby Doe:");
-        for (Person sibling : familyTree.getSiblingsOfPerson("Baby", "Doe")) {
-            System.out.println(sibling);
-        }
-
-        // Удаление Baby Doe из дерева
-        familyTree.removePerson(babyDoe);
-        System.out.println("\nFamily Tree after removing Baby Doe:");
-        System.out.println(familyTree);
-
-        // Использование методов getDateOfBirth() и getGender()
-        System.out.println("\nDetails of John Doe:");
-        System.out.println("Date of Birth: " + john.getDateOfBirth());
-        System.out.println("Gender: " + john.getGender());
-
-        System.out.println("\nDetails of Baby Doe:");
-        System.out.println("Date of Birth: " + babyDoe.getDateOfBirth());
-        System.out.println("Gender: " + babyDoe.getGender());
-
-        // Сохранение дерева в файл и его загрузка
-        FamilyTreeStorage storage = new FileFamilyTreeStorage();
-        try {
-            storage.save(familyTree, "family_tree.dat");
-
-            // Загружаем дерево из файла
-            FamilyTree<?> loadedTree = storage.load("family_tree.dat");
-            if (loadedTree != null) {
-                FamilyTree<Person> castedTree = (FamilyTree<Person>) loadedTree;
-
-                System.out.println("\nLoaded Family Tree:");
-                System.out.println(castedTree);
-            }
-
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("An error occurred: " + e.getMessage());
-        }
+    private static void runCommandLineInterface(FamilyTreePresenter presenter, ConsoleFamilyTreeView view) {
+        CommandLineInterface cli = new CommandLineInterface(presenter, view);
+        cli.start();
     }
 }
+
