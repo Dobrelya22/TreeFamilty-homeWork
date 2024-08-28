@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class FamilyTree<T extends Person> {
+public class FamilyTree<T extends TreeItem> {
     private final List<T> people;
 
     public FamilyTree() {
@@ -15,36 +15,38 @@ public class FamilyTree<T extends Person> {
         people.add(person);
     }
 
-    public T findPerson(String firstName, String lastName) {
+    public T findPerson(String name) {
         for (T person : people) {
-            if (person.getFirstName().equals(firstName) && person.getLastName().equals(lastName)) {
+            if (person.getName().equals(name)) {
                 return person;
             }
         }
         return null;
     }
 
-    public List<T> getChildrenOfPerson(String firstName, String lastName) {
-        T person = findPerson(firstName, lastName);
+    public List<T> getChildrenOfPerson(String name) {
+        T person = findPerson(name);
         if (person != null) {
             List<T> children = new ArrayList<>();
-            for (Person child : person.getChildren()) {
-                children.add((T) child); // Приведение типа к T
+            for (TreeItem child : person.getChildren()) {
+                if (person.getClass().isInstance(child)) { // Проверка типа перед приведением
+                    children.add((T) child);
+                }
             }
             return children;
         }
         return new ArrayList<>();
     }
 
-    public List<T> getSiblingsOfPerson(String firstName, String lastName) {
-        T person = findPerson(firstName, lastName);
+    public List<T> getSiblingsOfPerson(String name) {
+        T person = findPerson(name);
         if (person != null) {
             List<T> siblings = new ArrayList<>();
             for (T p : people) {
                 if (p.getChildren().contains(person)) {
-                    for (Person child : p.getChildren()) {
-                        if (!child.equals(person)) {
-                            siblings.add((T) child); // Приведение типа к T
+                    for (TreeItem child : p.getChildren()) {
+                        if (!child.equals(person) && person.getClass().isInstance(child)) {
+                            siblings.add((T) child);
                         }
                     }
                 }
@@ -54,14 +56,14 @@ public class FamilyTree<T extends Person> {
         return new ArrayList<>();
     }
 
-    public List<T> getAncestorsOfPerson(String firstName, String lastName) {
+    public List<T> getAncestorsOfPerson(String name) {
         List<T> ancestors = new ArrayList<>();
-        T person = findPerson(firstName, lastName);
+        T person = findPerson(name);
         if (person != null) {
             for (T p : people) {
                 if (p.getChildren().contains(person)) {
                     ancestors.add(p);
-                    ancestors.addAll(getAncestorsOfPerson(p.getFirstName(), p.getLastName()));
+                    ancestors.addAll(getAncestorsOfPerson(p.getName()));
                 }
             }
         }
@@ -81,11 +83,15 @@ public class FamilyTree<T extends Person> {
     }
 
     public void sortByName() {
-        people.sort(Comparator.comparing(Person::getFirstName));
+        people.sort(Comparator.comparing(TreeItem::getName));
     }
 
     public void sortByBirthDate() {
-        people.sort(Comparator.comparing(Person::getDateOfBirth));
+        people.sort(Comparator.comparing(person -> {
+            if (person instanceof Person) {
+                return ((Person) person).getDateOfBirth();
+            }
+            return null;
+        }));
     }
-
 }

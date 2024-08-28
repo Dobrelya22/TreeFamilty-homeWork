@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Person implements Serializable {
+public class Person implements Serializable, TreeItem {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -13,7 +13,7 @@ public class Person implements Serializable {
     private final String lastName;
     private final String dateOfBirth;
     private final String gender;
-    private final List<Person> children;
+    private final List<TreeItem> children;
 
     public Person(String firstName, String lastName, String dateOfBirth, String gender) {
         this.firstName = firstName;
@@ -21,6 +21,21 @@ public class Person implements Serializable {
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
         this.children = new ArrayList<>();
+    }
+
+    @Override
+    public String getName() {
+        return getFirstName() + " " + getLastName(); // Используем методы getFirstName() и getLastName()
+    }
+
+    @Override
+    public List<TreeItem> getChildren() {
+        return children;
+    }
+
+    @Override
+    public void addChild(TreeItem child) {
+        children.add(child);
     }
 
     public String getFirstName() {
@@ -39,18 +54,11 @@ public class Person implements Serializable {
         return gender;
     }
 
-    public void addChild(Person child) {
-        children.add(child);
-    }
-
-    public List<Person> getChildren() {
-        return children;
-    }
-
     @Override
     public String toString() {
-        return firstName + " " + lastName + " (" + gender + "), born: " + dateOfBirth;
+        return getFirstName() + " " + getLastName() + " (" + gender + "), born: " + dateOfBirth;
     }
 }
+
 
 

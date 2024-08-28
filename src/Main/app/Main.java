@@ -2,6 +2,7 @@ package Main.app;
 
 import Main.presenter.FamilyTreePresenter;
 import Main.service.FileFamilyTreeStorage;
+import Main.service.FamilyTreeService;
 import Main.view.ConsoleFamilyTreeView;
 
 public class Main {
@@ -16,7 +17,8 @@ public class Main {
 
     private static FamilyTreePresenter createPresenter() {
         ConsoleFamilyTreeView view = new ConsoleFamilyTreeView();
-        return new FamilyTreePresenter(new FileFamilyTreeStorage(), view);
+        FamilyTreeService service = new FamilyTreeService(new FileFamilyTreeStorage());
+        return new FamilyTreePresenter(service, view);
     }
 
     private static void populateFamilyTree(FamilyTreePresenter presenter) {
@@ -65,4 +67,5 @@ public class Main {
         cli.start();
     }
 }
+
 
