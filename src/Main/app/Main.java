@@ -12,13 +12,13 @@ public class Main {
         displayFamilyTree(presenter);
 
         // Запуск интерфейса командной строки
-        runCommandLineInterface(presenter, new ConsoleFamilyTreeView());
+        ConsoleFamilyTreeView view = new ConsoleFamilyTreeView(presenter);
+        view.start();
     }
 
     private static FamilyTreePresenter createPresenter() {
-        ConsoleFamilyTreeView view = new ConsoleFamilyTreeView();
         FamilyTreeService service = new FamilyTreeService(new FileFamilyTreeStorage());
-        return new FamilyTreePresenter(service, view);
+        return new FamilyTreePresenter(service, new ConsoleFamilyTreeView(null));
     }
 
     private static void populateFamilyTree(FamilyTreePresenter presenter) {
@@ -61,11 +61,7 @@ public class Main {
         System.out.println("\nFamily Tree sorted by birth date:");
         presenter.showTreeSortedByBirthDate();
     }
-
-    private static void runCommandLineInterface(FamilyTreePresenter presenter, ConsoleFamilyTreeView view) {
-        CommandLineInterface cli = new CommandLineInterface(presenter, view);
-        cli.start();
-    }
 }
+
 
 

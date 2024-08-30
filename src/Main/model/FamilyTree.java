@@ -1,10 +1,15 @@
 package Main.model;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class FamilyTree<T extends TreeItem> {
+public class FamilyTree<T extends TreeItem> implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final List<T> people;
 
     public FamilyTree() {
@@ -95,3 +100,4 @@ public class FamilyTree<T extends TreeItem> {
         }));
     }
 }
+
